@@ -81,6 +81,7 @@ export interface WorkspaceSlots {
 
 export interface ComponentListPanelSlots {
   'component-list-panel-header'(props: {}): any;
+  'component-list'(props: { componentGroupList: ComponentGroup[] }): any;
   'component-list-item'(props: { component: ComponentItem }): any;
 }
 
@@ -384,6 +385,10 @@ export interface SideComponent extends MenuComponent {
   icon?: any;
   /** slide 唯一标识 key */
   $key: string;
+  /** 是否可以将面板拖出，默认为true */
+  draggable?: boolean;
+  /** 点击切换tab前调用，返回false阻止切换 */
+  beforeClick?: (config: SideComponent) => boolean | Promise<boolean>;
 
   /** 组件扩展参数 */
   boxComponentConfig?: {
@@ -774,7 +779,7 @@ export type PropsFormValueFunction = (data: { editorService: EditorService }) =>
 export type PartSortableOptions = Omit<Options, 'onStart' | 'onUpdate'>;
 export interface PageBarSortOptions extends PartSortableOptions {
   /** 在onUpdate之后调用 */
-  afterUpdate: (event: SortableEvent, sortable: Sortable) => void;
+  afterUpdate?: (event: SortableEvent, sortable: Sortable) => void | Promise<void>;
   /** 在onStart之前调用 */
-  beforeStart: (event: SortableEvent, sortable: Sortable) => void;
+  beforeStart?: (event: SortableEvent, sortable: Sortable) => void | Promise<void>;
 }

@@ -111,28 +111,21 @@ class DataSourceManager extends EventEmitter {
       return;
     }
 
-    const beforeInit: ((...args: any[]) => any)[] = [];
-    const afterInit: ((...args: any[]) => any)[] = [];
-
-    ds.methods.forEach((method) => {
+    for (const method of ds.methods) {
       if (typeof method.content !== 'function') return;
       if (method.timing === 'beforeInit') {
-        beforeInit.push(method.content);
+        method.content({ params: {}, dataSource: ds, app: this.app });
       }
-      if (method.timing === 'afterInit') {
-        afterInit.push(method.content);
-      }
-    });
-
-    for (const method of beforeInit) {
-      await method({ params: {}, dataSource: ds, app: this.app });
     }
 
     await ds.init();
 
-    for (const method of afterInit) {
-      await method({ params: {}, dataSource: ds, app: this.app });
-    }
+    ds.methods.forEach((method) => {
+      if (typeof method.content !== 'function') return;
+      if (method.timing === 'afterInit') {
+        method.content({ params: {}, dataSource: ds, app: this.app });
+      }
+    });
   }
 
   public get(id: string) {
@@ -222,7 +215,7 @@ class DataSourceManager extends EventEmitter {
     const [dsId, ...keys] = dataSourceField;
     const ds = this.get(dsId);
     if (!ds) return items;
-    return compliedIteratorItems(itemData, items, dsId, keys);
+    return compliedIteratorItems(itemData, items, dsId, keys, this.data, this.app.platform === 'editor');
   }
 
   public destroy() {
